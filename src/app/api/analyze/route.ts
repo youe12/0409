@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { LLMClient, Config, HeaderUtils } from "coze-coding-dev-sdk";
 import { LLM_CONFIG } from "@/lib/llm-config";
 
 interface Answer {
@@ -14,6 +13,10 @@ interface AnalysisRequest {
   childName?: string;
   childAge?: number;
 }
+
+// 豆包API配置
+const DOUBAO_API_URL = process.env.DOUBAO_API_URL || "https://ark.cn-beijing.volces.com/api/v3/chat/completions";
+const DOUBAO_API_KEY = process.env.DOUBAO_API_KEY || "";
 
 /**
  * 构建分析提示词
@@ -78,7 +81,7 @@ ${data.answers.map(a => `题目${a.questionId}（${a.assessmentType}-${a.dimensi
 
 /**
  * POST /api/analyze
- * AI分析答题结果
+ * 豆包API分析答题结果（流式输出）
  */
 export async function POST(request: NextRequest) {
   try {
@@ -91,36 +94,84 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const config = new Config();
-    const customHeaders = HeaderUtils.extractForwardHeaders(request.headers);
-    const client = new LLMClient(config, customHeaders);
+    // 检查API密钥
+    if (!DOUBAO_API_KEY) {
+      return NextResponse.json(
+        { error: "未配置豆包API密钥，请设置 DOUBAO_API_KEY 环境变量" },
+        { status: 500 }
+      );
+    }
 
     const prompt = buildAnalysisPrompt(body);
 
-    // 使用流式输出
+    // 调用豆包API（流式）
+    const response = await fetch(DOUBAO_API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${DOUBAO_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: LLM_CONFIG.model,
+        messages: [
+          { role: "system", content: LLM_CONFIG.systemPrompt },
+          { role: "user", content: prompt },
+        ],
+        stream: true,
+        temperature: LLM_CONFIG.temperature,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("豆包API错误:", response.status, errorText);
+      return NextResponse.json(
+        { error: `AI服务调用失败: ${response.status}` },
+        { status: 500 }
+      );
+    }
+
+    // 流式转发响应
     const encoder = new TextEncoder();
     const stream = new ReadableStream({
       async start(controller) {
+        const reader = response.body?.getReader();
+        if (!reader) {
+          controller.close();
+          return;
+        }
+
         try {
-          const messages = [
-            { role: "system", content: LLM_CONFIG.systemPrompt },
-            { role: "user", content: prompt },
-          ];
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
 
-          const aiStream = client.stream(messages, {
-            model: LLM_CONFIG.model,
-            temperature: LLM_CONFIG.temperature,
-            thinking: LLM_CONFIG.thinking,
-          });
+            // 解析SSE数据
+            const chunk = new TextDecoder().decode(value);
+            const lines = chunk.split("\n");
 
-          for await (const chunk of aiStream) {
-            if (chunk.content) {
-              controller.enqueue(encoder.encode(chunk.content.toString()));
+            for (const line of lines) {
+              if (line.startsWith("data: ")) {
+                const data = line.slice(6);
+                if (data === "[DONE]") {
+                  controller.close();
+                  return;
+                }
+                try {
+                  const parsed = JSON.parse(data);
+                  const content = parsed.choices?.[0]?.delta?.content;
+                  if (content) {
+                    controller.enqueue(encoder.encode(content));
+                  }
+                } catch {
+                  // 忽略解析错误
+                }
+              }
             }
           }
           controller.close();
         } catch (error) {
-          console.error("流式分析错误:", error);
+          console.error("流式读取错误:", error);
           controller.error(error);
         }
       },
