@@ -8,7 +8,7 @@ export interface QuestionOption {
 
 export interface Question {
   questionId: number;
-  assessmentType: "韦氏智力测评" | "多元智能测试" | "补充题";
+  assessmentType: string;
   dimension: string;
   questionContent: string;
   options: QuestionOption[];
