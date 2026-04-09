@@ -96,7 +96,8 @@ export async function POST(request: NextRequest) {
     // 调试：检查环境变量
     const apiKey = process.env.COZE_WORKLOAD_IDENTITY_API_KEY;
     const baseUrl = process.env.COZE_INTEGRATION_BASE_URL || "https://integration.coze.cn";
-    const modelBaseUrl = process.env.COZE_INTEGRATION_MODEL_BASE_URL || "https://model.coze.com";
+    // 使用 integration.coze.cn 作为 modelBaseUrl
+    const modelBaseUrl = process.env.COZE_INTEGRATION_MODEL_BASE_URL || "https://integration.coze.cn/api/v3";
     
     console.log("调试信息:");
     console.log("- API Key 长度:", apiKey?.length || 0);
