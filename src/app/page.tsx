@@ -11,6 +11,66 @@ import { ChevronLeft, ChevronRight, Brain, Users, FileText, Star, CheckCircle2, 
 import { DimensionRadarChart, DimensionBarChart, ScoreProgress } from "@/components/dimension-chart";
 import type { Question, AssessmentInfo, UserAnswer, ChildInfo, AnalysisAnswer } from "@/types/assessment";
 
+// 图形渲染组件
+function QuestionGraphic({ questionId }: { questionId: number }) {
+  // 题目4：图形交替规律
+  if (questionId === 4) {
+    return (
+      <div className="flex items-center justify-center gap-4 py-6 my-4 bg-indigo-50 rounded-xl">
+        <div className="flex items-center gap-3 text-2xl">
+          <ShapeDisplay shape="circle" />
+          <span className="text-indigo-400">→</span>
+          <ShapeDisplay shape="square" />
+          <span className="text-indigo-400">→</span>
+          <ShapeDisplay shape="circle" />
+          <span className="text-indigo-400">→</span>
+          <ShapeDisplay shape="square" />
+          <span className="text-indigo-400">→</span>
+          <span className="text-gray-400 text-xl">？</span>
+        </div>
+      </div>
+    );
+  }
+
+  // 题目16：圆形里面的三角形
+  if (questionId === 16) {
+    return (
+      <div className="flex items-center justify-center py-6 my-4">
+        <div className="relative w-32 h-32">
+          {/* 外层圆形 */}
+          <svg viewBox="0 0 100 100" className="w-full h-full">
+            <circle cx="50" cy="50" r="45" fill="#4f46e5" opacity="0.2" stroke="#4f46e5" strokeWidth="3" />
+            {/* 里面的三角形 */}
+            <polygon points="50,20 75,70 25,70" fill="#f59e0b" stroke="#f59e0b" strokeWidth="2" />
+          </svg>
+        </div>
+      </div>
+    );
+  }
+
+  return null;
+}
+
+// 基础图形组件
+function ShapeDisplay({ shape, size = "lg" }: { shape: "circle" | "square" | "triangle"; size?: "sm" | "lg" }) {
+  const sizeClass = size === "lg" ? "w-12 h-12" : "w-8 h-8";
+  
+  if (shape === "circle") {
+    return <div className={`${sizeClass} rounded-full bg-indigo-500 border-2 border-indigo-600`} />;
+  }
+  if (shape === "square") {
+    return <div className={`${sizeClass} rounded-md bg-purple-500 border-2 border-purple-600`} />;
+  }
+  if (shape === "triangle") {
+    return (
+      <svg viewBox="0 0 100 100" className={sizeClass}>
+        <polygon points="50,10 90,90 10,90" fill="#f59e0b" stroke="#f59e0b" strokeWidth="2" />
+      </svg>
+    );
+  }
+  return null;
+}
+
 // 静态导入题目数据
 import questionsData from "@/questions.json";
 
@@ -386,9 +446,12 @@ export default function AssessmentPage() {
                 </div>
 
                 {/* 题目内容 */}
-                <h2 className="text-xl md:text-2xl font-semibold text-gray-900 mb-8 leading-relaxed">
+                <h2 className="text-xl md:text-2xl font-semibold text-gray-900 mb-2 leading-relaxed">
                   {currentQuestion.questionContent}
                 </h2>
+
+                {/* 图形展示（如果有） */}
+                <QuestionGraphic questionId={currentQuestion.questionId} />
 
                 {/* 选项 */}
                 <RadioGroup 
