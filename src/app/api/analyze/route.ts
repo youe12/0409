@@ -93,13 +93,27 @@ export async function POST(request: NextRequest) {
 
     const encoder = new TextEncoder();
     
+    // 调试：检查环境变量
+    const apiKey = process.env.COZE_WORKLOAD_IDENTITY_API_KEY;
+    const baseUrl = process.env.COZE_INTEGRATION_BASE_URL || "https://integration.coze.cn";
+    const modelBaseUrl = process.env.COZE_INTEGRATION_MODEL_BASE_URL || "https://model.coze.com";
+    
+    console.log("调试信息:");
+    console.log("- API Key 长度:", apiKey?.length || 0);
+    console.log("- baseUrl:", baseUrl);
+    console.log("- modelBaseUrl:", modelBaseUrl);
+    
     // 检查 config 是否有效
     let config: Config;
     try {
-      config = new Config();
+      config = new Config({
+        apiKey: apiKey,
+        baseUrl: baseUrl,
+        modelBaseUrl: modelBaseUrl,
+      });
       // 验证配置
       if (!config.apiKey) {
-        throw new Error("API Key 未配置，请检查环境变量 COZE_WORKLOAD_IDENTITY_API_KEY");
+        throw new Error("API Key 未配置");
       }
     } catch (configError) {
       const errorMsg = configError instanceof Error ? configError.message : String(configError);
