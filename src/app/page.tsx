@@ -179,7 +179,10 @@ export default function AssessmentPage() {
         }),
       });
 
-      if (!response.ok) throw new Error("分析请求失败");
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || "分析请求失败");
+      }
 
       // 处理流式响应
       const reader = response.body?.getReader();
@@ -192,6 +195,13 @@ export default function AssessmentPage() {
           if (done) break;
 
           const chunk = decoder.decode(value);
+          
+          // 检查是否包含错误标记
+          const errorMatch = chunk.match(/\[ERROR\](.*?)\[\/ERROR\]/);
+          if (errorMatch) {
+            throw new Error(errorMatch[1]);
+          }
+          
           result += chunk;
           setAnalysisResult(result);
           

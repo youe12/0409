@@ -91,17 +91,41 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const config = new Config();
-    const customHeaders = HeaderUtils.extractForwardHeaders(request.headers);
-    const client = new LLMClient(config, customHeaders);
-
-    const prompt = buildAnalysisPrompt(body);
-
-    // 使用流式输出
     const encoder = new TextEncoder();
+    
+    // 检查 config 是否有效
+    let config: Config;
+    try {
+      config = new Config();
+      // 验证配置
+      if (!config.apiKey) {
+        throw new Error("API Key 未配置，请检查环境变量 COZE_WORKLOAD_IDENTITY_API_KEY");
+      }
+    } catch (configError) {
+      const errorMsg = configError instanceof Error ? configError.message : String(configError);
+      console.error("Config 初始化错误:", errorMsg);
+      const errorStream = new ReadableStream({
+        start(controller) {
+          controller.enqueue(encoder.encode(`[ERROR]${errorMsg}[/ERROR]`));
+          controller.close();
+        },
+      });
+      return new Response(errorStream, {
+        headers: {
+          "Content-Type": "text/event-stream; charset=utf-8",
+          "Transfer-Encoding": "chunked",
+        },
+      });
+    }
+
     const stream = new ReadableStream({
       async start(controller) {
         try {
+          const customHeaders = HeaderUtils.extractForwardHeaders(request.headers);
+          const client = new LLMClient(config, customHeaders);
+
+          const prompt = buildAnalysisPrompt(body);
+
           const messages: Array<{ role: "system" | "user" | "assistant"; content: string }> = [
             { role: "system", content: LLM_CONFIG.systemPrompt },
             { role: "user", content: prompt },
@@ -121,7 +145,9 @@ export async function POST(request: NextRequest) {
           controller.close();
         } catch (error) {
           console.error("流式分析错误:", error);
-          controller.error(error);
+          const errorMessage = error instanceof Error ? error.message : String(error);
+          controller.enqueue(encoder.encode(`\n\n[ERROR]分析失败: ${errorMessage}[/ERROR]`));
+          controller.close();
         }
       },
     });
@@ -134,10 +160,11 @@ export async function POST(request: NextRequest) {
         "Connection": "keep-alive",
       },
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("分析请求错误:", error);
+    const errorMessage = error instanceof Error ? error.message : String(error);
     return NextResponse.json(
-      { error: "分析服务暂时不可用，请稍后重试" },
+      { error: `分析服务暂时不可用: ${errorMessage}` },
       { status: 500 }
     );
   }
