@@ -75,7 +75,7 @@
         "questionId": 4,
         "assessmentType": "韦氏智力测评",
         "dimension": "逻辑推理",
-        "questionContent": "观察图形“圆形→方形→圆形→方形”，下一个图形应该是？",
+        "questionContent": "观察下面👇图形规律，下一个图形应该是？",
         "options": [
           {"option": "A", "content": "三角形", "score": 1},
           {"option": "B", "content": "圆形", "score": 5},
@@ -243,7 +243,7 @@
         "questionId": 16,
         "assessmentType": "韦氏智力测评",
         "dimension": "空间感知",
-        "questionContent": "观察下图（假设为“圆形里面有一个三角形”），下列说法正确的是？",
+        "questionContent": "观察下图，下列说法正确的是？",
         "options": [
           {"option": "A", "content": "三角形在圆形外面", "score": 1},
           {"option": "B", "content": "圆形在三角形里面", "score": 2},
