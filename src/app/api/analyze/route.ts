@@ -102,7 +102,7 @@ export async function POST(request: NextRequest) {
     const stream = new ReadableStream({
       async start(controller) {
         try {
-          const messages = [
+          const messages: Array<{ role: "system" | "user" | "assistant"; content: string }> = [
             { role: "system", content: LLM_CONFIG.systemPrompt },
             { role: "user", content: prompt },
           ];
