@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -594,7 +594,7 @@ export default function AssessmentPage() {
 function ReportRenderer({ content }: { content: string }) {
   // 解析内容为可渲染的sections
   const lines = content.split("\n");
-  const elements: JSX.Element[] = [];
+  const elements: React.JSX.Element[] = [];
   let currentSection: string[] = [];
   let sectionKey = 0;
 
