@@ -31,5 +31,4 @@ echo "Clearing port ${PORT} before start."
 kill_port_if_listening
 echo "Starting HTTP service on port ${PORT} for dev..."
 
-# Use pnpm exec to run next (handles pnpm module resolution)
-PORT=$PORT pnpm exec next dev -p $PORT --turbopack
+PORT=$PORT pnpm tsx watch src/server.ts
