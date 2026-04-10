@@ -257,6 +257,36 @@ body {
   font-weight: 600;
 }
 
+/* 卡通贴纸浮动动画 */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px) rotate(-3deg);
+  }
+  50% {
+    transform: translateY(-10px) rotate(3deg);
+  }
+}
+
+.float-animation {
+  animation: float 3s ease-in-out infinite;
+}
+
+.float-animation-delayed {
+  animation: float 3s ease-in-out infinite;
+  animation-delay: 1.5s;
+}
+
+/* 贴纸阴影效果 */
+.float-animation,
+.float-animation-delayed {
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
+  transition: transform 0.3s ease;
+}
+
+.float-animation:hover,
+.float-animation-delayed:hover {
+  transform: scale(1.1);
+}
 .level-excellent {
   background: #dcfce7;
   color: #166534;

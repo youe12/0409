@@ -278,7 +278,22 @@ export default function AssessmentPage() {
         {status === "intro" && (
           <div className="animate-fade-in">
             {/* Hero Section */}
-            <div className="text-center mb-12">
+            <div className="text-center mb-12 relative">
+              {/* 装饰性卡通贴纸 - 左上角 */}
+              <img 
+                src="/talent-genius.png" 
+                alt="逻辑小天才" 
+                className="absolute -top-4 -left-8 w-24 h-24 object-contain z-10 float-animation"
+                style={{ animation: 'float 3s ease-in-out infinite' }}
+              />
+              {/* 装饰性卡通贴纸 - 右上角 */}
+              <img 
+                src="/intelligence-master.png" 
+                alt="智力小达人" 
+                className="absolute -top-4 -right-8 w-24 h-24 object-contain z-10 float-animation-delayed"
+                style={{ animation: 'float 3s ease-in-out infinite 1.5s' }}
+              />
+              
               <div className="inline-flex items-center gap-2 bg-indigo-100 text-indigo-700 px-4 py-2 rounded-full text-sm font-medium mb-6">
                 <Star className="w-4 h-4" />
                 专业儿童天赋测评
@@ -578,8 +593,20 @@ export default function AssessmentPage() {
         {/* 报告页面 */}
         {status === "report" && (
           <div className="animate-fade-in">
-            {/* 报告头部 */}
-            <div className="text-center mb-8">
+            {/* 报告头部 - 带贴纸装饰 */}
+            <div className="text-center mb-8 relative">
+              {/* 装饰贴纸 - 左侧 */}
+              <img 
+                src="/talent-genius.png" 
+                alt="天赋小天才" 
+                className="absolute left-0 top-1/2 -translate-y-1/2 w-16 h-16 object-contain"
+              />
+              {/* 装饰贴纸 - 右侧 */}
+              <img 
+                src="/intelligence-master.png" 
+                alt="智力小达人" 
+                className="absolute right-0 top-1/2 -translate-y-1/2 w-16 h-16 object-contain"
+              />
               <div className="inline-flex items-center gap-2 bg-green-100 text-green-700 px-4 py-2 rounded-full text-sm font-medium mb-4">
                 <CheckCircle2 className="w-4 h-4" />
                 测评完成
