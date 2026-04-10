@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+
+<html class="light" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>智学博悦 | 认知策展专家</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Manrope:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-secondary-container": "#506b4f",
+                        "tertiary-fixed-dim": "#ffb783",
+                        "inverse-surface": "#2d3131",
+                        "secondary": "#4a6549",
+                        "on-surface-variant": "#43474c",
+                        "on-primary-container": "#8caace",
+                        "secondary-container": "#ccebc7",
+                        "background": "#f7faf9",
+                        "on-tertiary": "#ffffff",
+                        "surface-container-low": "#f1f4f3",
+                        "tertiary-container": "#612f00",
+                        "secondary-fixed": "#ccebc7",
+                        "surface-dim": "#d7dbda",
+                        "primary-fixed": "#d1e4ff",
+                        "surface-variant": "#e0e3e2",
+                        "surface-bright": "#f7faf9",
+                        "tertiary-fixed": "#ffdcc5",
+                        "on-primary": "#ffffff",
+                        "on-secondary": "#ffffff",
+                        "on-primary-fixed": "#001d35",
+                        "on-tertiary-container": "#f78b30",
+                        "surface-container": "#ebeeed",
+                        "on-primary-fixed-variant": "#2a4968",
+                        "tertiary": "#411d00",
+                        "surface-container-highest": "#e0e3e2",
+                        "surface-container-high": "#e6e9e8",
+                        "primary-fixed-dim": "#abc9ef",
+                        "inverse-primary": "#abc9ef",
+                        "inverse-on-surface": "#eef1f0",
+                        "on-error": "#ffffff",
+                        "outline-variant": "#c4c6cd",
+                        "outline": "#74777d",
+                        "error-container": "#ffdad6",
+                        "secondary-fixed-dim": "#b0cfad",
+                        "on-secondary-fixed": "#07200b",
+                        "on-surface": "#181c1c",
+                        "primary-container": "#1f3e5d",
+                        "on-tertiary-fixed": "#301400",
+                        "on-background": "#181c1c",
+                        "primary": "#022846",
+                        "on-error-container": "#93000a",
+                        "surface-container-lowest": "#ffffff",
+                        "error": "#ba1a1a",
+                        "on-tertiary-fixed-variant": "#713700",
+                        "on-secondary-fixed-variant": "#334d33",
+                        "surface-tint": "#436182",
+                        "surface": "#f7faf9"
+                    },
+                    fontFamily: {
+                        "headline": ["Plus Jakarta Sans"],
+                        "body": ["Manrope"],
+                        "label": ["Manrope"]
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body { font-family: 'Manrope', 'PingFang SC', 'Microsoft YaHei', sans-serif; }
+        h1, h2, h3, h4 { font-family: 'Plus Jakarta Sans', 'PingFang SC', 'Microsoft YaHei', sans-serif; }
+        .glass-nav {
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface selection:bg-secondary-container">
+<!-- Top Navigation Bar -->
+<nav class="fixed top-0 w-full z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md shadow-sm dark:shadow-none">
+<div class="flex justify-between items-center w-full px-6 py-4 max-w-7xl mx-auto">
+<div class="text-xl font-bold text-slate-900 dark:text-white tracking-tighter">
+            智学博悦
+        </div>
+<div class="hidden md:flex gap-8 items-center font-plus-jakarta text-sm font-medium tracking-tight">
+<a class="text-slate-900 dark:text-white font-bold border-b-2 border-slate-900 dark:border-white pb-1" href="#">探索</a>
+<a class="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors" href="#">关于我们</a>
+<a class="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors" href="#">测评报告</a>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 text-slate-500 hover:bg-slate-50/50 rounded-full transition-all">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="px-5 py-2 rounded-full bg-primary text-white font-bold hover:scale-95 active:scale-90 duration-200 transition-all">
+                个人中心
+            </button>
+</div>
+</div>
+</nav>
+<main class="pt-24 overflow-x-hidden">
+<!-- Hero Section: Intentional Asymmetry -->
+<section class="relative px-6 py-16 md:py-32 max-w-7xl mx-auto">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+<div class="lg:col-span-7 z-10">
+<span class="inline-block py-1 px-4 mb-6 rounded-full bg-secondary-container text-on-secondary-container text-xs font-bold tracking-widest uppercase">
+                    赋能探索发现
+                </span>
+<h1 class="text-5xl md:text-6xl font-extrabold text-primary leading-tight tracking-tighter mb-8">
+                    探索孩子的<span class="text-secondary">独特潜能：</span>AI驱动的智能测评
+                </h1>
+<p class="text-xl text-on-surface-variant max-w-2xl leading-relaxed mb-10">
+                    唯一结合韦氏认知技能与加德纳多元智能理论的深度测评系统。
+                </p>
+<div class="flex flex-wrap gap-4">
+<button class="px-8 py-4 rounded-full bg-gradient-to-br from-primary to-primary-container text-white font-bold text-lg shadow-lg hover:shadow-primary/20 transition-all transform hover:-translate-y-1">
+                        开始首次免费测评
+                    </button>
+<button class="px-8 py-4 rounded-full bg-surface-container-highest text-primary font-bold text-lg hover:bg-surface-variant transition-all">
+                        查看样本报告
+                    </button>
+</div>
+</div>
+<div class="lg:col-span-5 relative">
+<div class="relative w-full aspect-square rounded-[2rem] overflow-hidden shadow-2xl z-20">
+<img alt="父母与孩子互动" class="w-full h-full object-cover" data-alt="Parents and child laughing while learning together" src="https://lh3.googleusercontent.com/aida-public/AB6AXuACZnlxdYkB2AxOM-nxjlijipnR2LKa5h4l2HygL0KXqmPaAd5djUFAADeaLZVJLpANQrVz0ovHIUpu8Za4Dzq1Z-w3AbSCPdmTkCxh6QvJqSgmj_VKi45WpetX0TaHrKJAZC0mknAAyJ5yIparJugQMCieWBDu_iWhTw29O7BDt0or7wWHsZPu6hnxSupyTwMsucrsRQi1FURhoAkXU07dlfDgK6UXOea3DVRsNNp7xzv5aPgcqiaV81fE4eN3jPrkh5wKXEGTrf8x"/>
+</div>
+<!-- Decorative Element Bleeding Off -->
+<div class="absolute -top-12 -right-12 w-64 h-64 bg-secondary/10 rounded-full blur-3xl z-0"></div>
+<div class="absolute -bottom-8 -left-8 w-48 h-48 bg-tertiary-fixed/30 rounded-full blur-2xl z-0"></div>
+<!-- Floating Stat Card -->
+<div class="absolute bottom-12 -left-16 hidden xl:block z-30 p-6 bg-white/90 backdrop-blur-xl rounded-2xl shadow-xl border border-white/20">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-secondary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">psychology</span>
+</div>
+<div>
+<div class="text-2xl font-bold text-primary">98%</div>
+<div class="text-xs text-on-surface-variant">评估准确率</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Feature Bento Grid -->
+<section class="bg-surface-container-low py-24 px-6">
+<div class="max-w-7xl mx-auto">
+<div class="mb-16 text-center">
+<h2 class="text-3xl md:text-5xl font-bold text-primary mb-4 tracking-tight">我们的精准测评体系</h2>
+<p class="text-on-surface-variant max-w-xl mx-auto">精密的方法论结合直观的设计，揭示孩子内心隐藏的认知架构。</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+<!-- Scientific Foundations -->
+<div class="p-8 rounded-3xl bg-surface-container-lowest shadow-sm hover:shadow-md transition-all flex flex-col h-full">
+<div class="w-14 h-14 rounded-2xl bg-primary/5 flex items-center justify-center mb-6">
+<span class="material-symbols-outlined text-primary text-3xl">menu_book</span>
+</div>
+<h3 class="text-xl font-bold text-primary mb-4">科学依据</h3>
+<p class="text-on-surface-variant leading-relaxed">基于心理测量学的黄金标准，我们的测评利用经临床验证的认知模型，提供无可比拟的分析深度。</p>
+<div class="mt-auto pt-8">
+<a class="text-secondary font-bold flex items-center gap-2 group" href="#">
+                            探索方法论 <span class="material-symbols-outlined text-sm group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</a>
+</div>
+</div>
+<!-- AI-Powered Analysis -->
+<div class="p-8 rounded-3xl bg-surface-container-lowest shadow-sm hover:shadow-md transition-all flex flex-col h-full border-2 border-secondary/10 scale-105 z-10">
+<div class="w-14 h-14 rounded-2xl bg-secondary/5 flex items-center justify-center mb-6">
+<span class="material-symbols-outlined text-secondary text-3xl">neurology</span>
+</div>
+<h3 class="text-xl font-bold text-primary mb-4">AI智能分析</h3>
+<p class="text-on-surface-variant leading-relaxed">我们专有的算法通过分析行为模式和反应延迟，提供360度的全方位认知画像。</p>
+<div class="mt-auto pt-8">
+<a class="text-secondary font-bold flex items-center gap-2 group" href="#">
+                            查看AI分析实录 <span class="material-symbols-outlined text-sm group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</a>
+</div>
+</div>
+<!-- Professional Growth Path -->
+<div class="p-8 rounded-3xl bg-surface-container-lowest shadow-sm hover:shadow-md transition-all flex flex-col h-full">
+<div class="w-14 h-14 rounded-2xl bg-tertiary-fixed/20 flex items-center justify-center mb-6">
+<span class="material-symbols-outlined text-on-tertiary-fixed-variant text-3xl">trending_up</span>
+</div>
+<h3 class="text-xl font-bold text-primary mb-4">专业成长路径</h3>
+<p class="text-on-surface-variant leading-relaxed">我们不仅提供数据，更提供路线图。为教育者和临床专家量身定制的可执行策略。</p>
+<div class="mt-auto pt-8">
+<a class="text-secondary font-bold flex items-center gap-2 group" href="#">
+                            查看学习路径 <span class="material-symbols-outlined text-sm group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</a>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- The Fusion Approach: Depth and Visualization -->
+<section class="py-24 px-6 max-w-7xl mx-auto overflow-hidden">
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
+<div class="relative order-2 lg:order-1">
+<!-- Conceptual Radar Chart Representation -->
+<div class="relative w-full aspect-square flex items-center justify-center">
+<div class="absolute inset-0 bg-secondary/5 rounded-full blur-3xl"></div>
+<div class="relative w-72 h-72 md:w-96 md:h-96 border border-primary/10 rounded-full flex items-center justify-center p-8">
+<!-- Visualizing the Radar/Intelligence Fusion -->
+<svg class="w-full h-full drop-shadow-lg" viewbox="0 0 100 100">
+<polygon class="text-primary/10" fill="none" points="50,5 95,25 95,75 50,95 5,75 5,25" stroke="currentColor" stroke-width="0.5"></polygon>
+<polygon class="text-primary/10" fill="none" points="50,20 80,35 80,65 50,80 20,65 20,35" stroke="currentColor" stroke-width="0.5"></polygon>
+<polygon fill="#4a6549" fill-opacity="0.2" points="50,15 85,30 75,80 50,85 15,65 30,25" stroke="#4a6549" stroke-width="1.5"></polygon>
+<circle cx="50" cy="15" fill="#022846" r="2"></circle>
+<circle cx="85" cy="30" fill="#022846" r="2"></circle>
+<circle cx="75" cy="80" fill="#022846" r="2"></circle>
+<circle cx="50" cy="85" fill="#022846" r="2"></circle>
+<circle cx="15" cy="65" fill="#022846" r="2"></circle>
+<circle cx="30" cy="25" fill="#022846" r="2"></circle>
+</svg>
+</div>
+<!-- Floating Tags -->
+<span class="absolute top-0 right-4 py-2 px-4 bg-secondary-container text-on-secondary-container rounded-full text-xs font-bold">语言能力</span>
+<span class="absolute bottom-8 right-0 py-2 px-4 bg-secondary-container text-on-secondary-container rounded-full text-xs font-bold">空间想象</span>
+<span class="absolute top-1/2 -left-8 py-2 px-4 bg-primary text-white rounded-full text-xs font-bold">韦氏量表</span>
+</div>
+</div>
+<div class="order-1 lg:order-2">
+<h2 class="text-3xl md:text-5xl font-bold text-primary mb-8 tracking-tight">韦氏智力 + 多元智能深度融合</h2>
+<div class="space-y-8">
+<div class="flex gap-6">
+<div class="flex-shrink-0 w-12 h-12 rounded-full bg-primary text-white flex items-center justify-center font-bold">1</div>
+<div>
+<h4 class="text-xl font-bold text-primary mb-2">认知核心 (韦氏)</h4>
+<p class="text-on-surface-variant">我们评估智力的基石：利用临床验证的指标分析加工速度、工作记忆和流体推理。</p>
+</div>
+</div>
+<div class="flex gap-6">
+<div class="flex-shrink-0 w-12 h-12 rounded-full bg-secondary text-white flex items-center justify-center font-bold">2</div>
+<div>
+<h4 class="text-xl font-bold text-primary mb-2">表达天赋 (加德纳)</h4>
+<p class="text-on-surface-variant">超越传统的逻辑评估，我们测绘孩子在人际、音乐和动觉领域的自然倾向，发现隐藏的优势。</p>
+</div>
+</div>
+<div class="flex gap-6">
+<div class="flex-shrink-0 w-12 h-12 rounded-full bg-on-tertiary-container text-white flex items-center justify-center font-bold">3</div>
+<div>
+<h4 class="text-xl font-bold text-primary mb-2">AI综合洞察</h4>
+<p class="text-on-surface-variant">我们的引擎分析原始认知能力与特定智能领域之间的相关性，揭示真正的成长路径。</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Social Proof Section -->
+<section class="bg-surface py-24 px-6 border-t border-outline-variant/10">
+<div class="max-w-7xl mx-auto">
+<div class="flex flex-col md:flex-row justify-between items-end gap-6 mb-16">
+<div>
+<h2 class="text-3xl md:text-5xl font-bold text-primary tracking-tight">专家推荐</h2>
+<p class="text-on-surface-variant mt-2">经儿科专家验证，深受全球家长信赖。</p>
+</div>
+<div class="flex gap-2">
+<span class="material-symbols-outlined text-on-tertiary-container" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-on-tertiary-container" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-on-tertiary-container" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-on-tertiary-container" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-on-tertiary-container" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+<!-- Parent Quote -->
+<div class="bg-surface-container-low p-8 rounded-3xl relative">
+<div class="absolute -top-4 -left-4 w-10 h-10 bg-white shadow-md rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-xl">format_quote</span>
+</div>
+<p class="text-lg italic text-on-surface mb-8 leading-relaxed">“我们收到的报告不仅是数字，更是女儿教育的导航图。我们终于理解了她最好的学习方式。”</p>
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-slate-300 overflow-hidden">
+<img alt="Sarah J." class="w-full h-full object-cover" data-alt="Profile photo of a smiling mother" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB1J40-JzRM46KNvBtX0gKXB817oGRhxnLuoxCUJnW9wNrMALI8cOpaaGhMfvOJFdAfqdbxLmm1LdeU-gg4ANpTrufquYNf47b98euU5wk359TnmLIMoc-kf_FxYSdzkuJNy5cfQnrjQ47EJPulnwDX4Q3Pr_PE7y9F2O8jnCu7ditQXK7Sljr9vwVXAjoi1LsMdT9jgVZYeyIFRmPgSwnSUemIk4qhPeCAEsBZkqvV2nMv9sP3uBnJWRp66p77tWfSWBSH-2IbVi6u"/>
+</div>
+<div>
+<div class="font-bold text-primary">Sarah Jenkins</div>
+<div class="text-xs text-on-surface-variant">7岁孩子的母亲</div>
+</div>
+</div>
+</div>
+<!-- Expert Quote -->
+<div class="bg-primary text-white p-8 rounded-3xl relative shadow-xl transform lg:-translate-y-4">
+<div class="absolute -top-4 -left-4 w-10 h-10 bg-secondary shadow-md rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined text-white text-xl">verified</span>
+</div>
+<p class="text-lg italic mb-8 leading-relaxed">“作为一名临床医生，我对智学博悦体系的严谨性印象深刻。它弥补了实验室级测试与家庭可及洞察之间的鸿沟。”</p>
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-slate-500 overflow-hidden">
+<img alt="Dr. Aris" class="w-full h-full object-cover" data-alt="Portrait of a professional pediatrician" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBCwTvUpEUsSd6qUwBwg8TYAZNvEJ7Pg49rAI8Wvd38pCiku9Rmf7LrqJGLE1Mdq07quLKopusDMGIbtRbgtcFe-vmG2-wTjdTYmGy6lrlIF3nwkpecHSIgj00awb_BZK6bVMAfV0StHT1h_vqQMwTlKwXME7KjrliIlzWPU17tyJ5TcslPnF2asvwfw_ZLoNXF4gPWl7DWDri_OQrEKtAqazESHZLFMNTD5HTQuxtqVBVVHGoQehZvEN5D57lVTEdaZuPc3AgVjdRX"/>
+</div>
+<div>
+<div class="font-bold">Marcus Aris 博士</div>
+<div class="text-xs opacity-70">儿科神经心理学家</div>
+</div>
+</div>
+</div>
+<!-- Teacher Quote -->
+<div class="bg-surface-container-low p-8 rounded-3xl relative">
+<div class="absolute -top-4 -left-4 w-10 h-10 bg-white shadow-md rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-xl">format_quote</span>
+</div>
+<p class="text-lg italic text-on-surface mb-8 leading-relaxed">“我向所有学生的家长推荐这个系统。这是目前针对认知多样化学习者最全面的评估方式。”</p>
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-slate-300 overflow-hidden">
+<img alt="Elena R." class="w-full h-full object-cover" data-alt="Photo of a middle school teacher" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAXYICq2yaA6YWiHljyEzWKDRVAGlYbt6GtkwvPN2UZATpgEZtMuEJFl5w36g5jk-F0aU83-rnC8KJ7bNAylYfUhfIFJV3TYhXwi-1AfQSDLI60vXFGFWf3xxc-qZtzEzZfjn-pPdBmnFKGW8cSrxUQNPoJocGJL_VUGH2Qg_H0JqMHnrE6PqEfs4gvxuo9rbu6H7l4PqQVuQfgygJ8RM8NvZ7UrEmkj7LsNZ37j9OwJbkGQFSWsLVL37RltWI-fxHdjurfGM0g6vTx"/>
+</div>
+<div>
+<div class="font-bold text-primary">Elena Rodriguez</div>
+<div class="text-xs text-on-surface-variant">特殊教育组长</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Final CTA Section -->
+<section class="py-24 px-6 text-center">
+<div class="max-w-3xl mx-auto bg-secondary-container/30 p-12 md:p-20 rounded-[3rem] relative overflow-hidden">
+<div class="absolute top-0 right-0 w-40 h-40 bg-secondary/10 rounded-full -mr-20 -mt-20 blur-2xl"></div>
+<h2 class="text-3xl md:text-5xl font-bold text-primary mb-6">准备好发现他们的闪光点了吗？</h2>
+<p class="text-lg text-on-surface-variant mb-10">加入超过25,000名已解锁孩子认知地图的家长行列。</p>
+<button class="px-10 py-5 rounded-full bg-primary text-white font-extrabold text-xl hover:scale-105 transition-transform shadow-xl">
+                立即免费开始
+            </button>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="w-full py-12 px-6 mt-auto bg-slate-50 dark:bg-slate-950 border-t border-slate-200/10">
+<div class="flex flex-col md:flex-row justify-between items-center gap-6 max-w-7xl mx-auto">
+<div class="flex flex-col items-center md:items-start">
+<div class="text-lg font-bold text-slate-800 dark:text-slate-200">智学博悦</div>
+<div class="text-slate-600 dark:text-slate-400 font-manrope text-xs leading-relaxed mt-1">
+                © 2024 智学博悦。科学智能测评。
+            </div>
+</div>
+<div class="flex flex-wrap justify-center gap-6">
+<a class="text-slate-500 dark:text-slate-400 hover:text-teal-600 dark:hover:text-teal-400 transition-colors font-manrope text-xs" href="#">隐私政策</a>
+<a class="text-slate-500 dark:text-slate-400 hover:text-teal-600 dark:hover:text-teal-400 transition-colors font-manrope text-xs" href="#">服务条款</a>
+<a class="text-slate-500 dark:text-slate-400 hover:text-teal-600 dark:hover:text-teal-400 transition-colors font-manrope text-xs" href="#">科学方法论</a>
+<a class="text-slate-500 dark:text-slate-400 hover:text-teal-600 dark:hover:text-teal-400 transition-colors font-manrope text-xs" href="#">联系支持</a>
+</div>
+<div class="flex gap-4">
+<span class="material-symbols-outlined text-slate-400 cursor-pointer hover:text-primary transition-colors">public</span>
+<span class="material-symbols-outlined text-slate-400 cursor-pointer hover:text-primary transition-colors">mail</span>
+</div>
+</div>
+</footer>
+</body></html>
