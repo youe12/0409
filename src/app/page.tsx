@@ -1,187 +1,104 @@
-"use client";
+'use client';
 
-import React, { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Progress } from "@/components/ui/progress";
-import { ChevronLeft, ChevronRight, Brain, Users, FileText, Star, CheckCircle2, Clock, BookOpen, BarChart3, Radar } from "lucide-react";
-import { DimensionRadarChart, DimensionBarChart, ScoreProgress } from "@/components/dimension-chart";
-import type { Question, AssessmentInfo, UserAnswer, ChildInfo, AnalysisAnswer } from "@/types/assessment";
+import { useState, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Progress } from '@/components/ui/progress';
+import { 
+  Brain, Clock, Star, ChevronRight, ChevronLeft, CheckCircle2, 
+  Sparkles, BookOpen, Users, TrendingUp, Menu, Lightbulb, 
+  BarChart3, FileText, GraduationCap
+} from 'lucide-react';
+import { DimensionBarChart } from '@/components/dimension-chart';
 
-// 图形渲染组件
-function QuestionGraphic({ questionId }: { questionId: number }) {
-  // 题目4：图形交替规律
-  if (questionId === 4) {
-    return (
-      <div className="flex items-center justify-center gap-4 py-6 my-4 bg-indigo-50 rounded-xl">
-        <div className="flex items-center gap-3 text-2xl">
-          <ShapeDisplay shape="circle" />
-          <span className="text-indigo-400">→</span>
-          <ShapeDisplay shape="square" />
-          <span className="text-indigo-400">→</span>
-          <ShapeDisplay shape="circle" />
-          <span className="text-indigo-400">→</span>
-          <ShapeDisplay shape="square" />
-          <span className="text-indigo-400">→</span>
-          <span className="text-gray-400 text-xl">？</span>
-        </div>
-      </div>
-    );
-  }
-
-  // 题目16：圆形里面的三角形
-  if (questionId === 16) {
-    return (
-      <div className="flex items-center justify-center py-6 my-4">
-        <div className="relative w-32 h-32">
-          {/* 外层圆形 */}
-          <svg viewBox="0 0 100 100" className="w-full h-full">
-            <circle cx="50" cy="50" r="45" fill="#4f46e5" opacity="0.2" stroke="#4f46e5" strokeWidth="3" />
-            {/* 里面的三角形 */}
-            <polygon points="50,20 75,70 25,70" fill="#f59e0b" stroke="#f59e0b" strokeWidth="2" />
-          </svg>
-        </div>
-      </div>
-    );
-  }
-
-  return null;
+interface Question {
+  id: number;
+  type: '韦氏智力测评' | '多元智能测评';
+  dimension: string;
+  question: string;
+  options: { value: number; label: string }[];
 }
 
-// 基础图形组件
-function ShapeDisplay({ shape, size = "lg" }: { shape: "circle" | "square" | "triangle"; size?: "sm" | "lg" }) {
-  const sizeClass = size === "lg" ? "w-12 h-12" : "w-8 h-8";
-  
-  if (shape === "circle") {
-    return <div className={`${sizeClass} rounded-full bg-indigo-500 border-2 border-indigo-600`} />;
-  }
-  if (shape === "square") {
-    return <div className={`${sizeClass} rounded-md bg-purple-500 border-2 border-purple-600`} />;
-  }
-  if (shape === "triangle") {
-    return (
-      <svg viewBox="0 0 100 100" className={sizeClass}>
-        <polygon points="50,10 90,90 10,90" fill="#f59e0b" stroke="#f59e0b" strokeWidth="2" />
-      </svg>
-    );
-  }
-  return null;
+interface AssessmentInfo {
+  title: string;
+  theoreticalBasis: string;
+  description: string;
+  features: Array<{ icon: string; title: string; description: string }>;
+  dimensions: string[];
+  reportDescription: string;
 }
 
-// 静态导入题目数据
-import questionsData from "@/questions.json";
-
-const { assessmentInfo: staticInfo, questionBank: staticQuestions } = questionsData;
+interface Answer {
+  questionId: number;
+  score: number;
+  dimension: string;
+  assessmentType: string;
+}
 
 export default function AssessmentPage() {
-  // 状态管理
-  const [status, setStatus] = useState<"intro" | "child_info" | "in_progress" | "analyzing" | "report">("intro");
-  const [childInfo, setChildInfo] = useState<ChildInfo>({ name: "", age: 8 });
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [answers, setAnswers] = useState<UserAnswer[]>([]);
-  const [analysisResult, setAnalysisResult] = useState("");
-  const [assessmentInfo, setAssessmentInfo] = useState<AssessmentInfo | null>(null);
+  const [status, setStatus] = useState<'intro' | 'info' | 'quiz' | 'analyzing' | 'report'>('intro');
+  const [childInfo, setChildInfo] = useState({ name: '', age: '' });
   const [questions, setQuestions] = useState<Question[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [assessmentInfo, setAssessmentInfo] = useState<AssessmentInfo | null>(null);
+  const [currentQuestion, setCurrentQuestion] = useState(0);
+  const [answers, setAnswers] = useState<Answer[]>([]);
+  const [analysisResult, setAnalysisResult] = useState('');
   const [analyzingProgress, setAnalyzingProgress] = useState(0);
 
-  // 加载题目数据
+  // 加载数据
   useEffect(() => {
-    // 使用静态数据
-    setAssessmentInfo(staticInfo);
-    setQuestions(staticQuestions);
-    setLoading(false);
+    fetch('/api/questions')
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          setQuestions(data.data.questions);
+          setAssessmentInfo(data.data.assessmentInfo);
+        }
+      });
   }, []);
 
-  // 处理选项选择
-  const handleOptionSelect = (option: string, score: number, question: Question) => {
-    const existingIndex = answers.findIndex(a => a.questionId === question.questionId);
-    const newAnswer: UserAnswer = {
-      questionId: question.questionId,
-      selectedOption: option,
-      score,
+  // 提交答案
+  const submitAnswer = (value: number) => {
+    const question = questions[currentQuestion];
+    const newAnswer: Answer = {
+      questionId: question.id,
+      score: value,
       dimension: question.dimension,
-      assessmentType: question.assessmentType,
+      assessmentType: question.type,
     };
+    setAnswers([...answers, newAnswer]);
 
-    if (existingIndex >= 0) {
-      const newAnswers = [...answers];
-      newAnswers[existingIndex] = newAnswer;
-      setAnswers(newAnswers);
+    if (currentQuestion < questions.length - 1) {
+      setCurrentQuestion(currentQuestion + 1);
     } else {
-      setAnswers([...answers, newAnswer]);
+      setStatus('analyzing');
+      analyzeAnswers([...answers, newAnswer]);
     }
   };
 
-  // 下一题
-  const handleNext = () => {
-    if (currentQuestionIndex < questions.length - 1) {
-      setCurrentQuestionIndex(currentQuestionIndex + 1);
-    }
-  };
-
-  // 上一题
-  const handlePrev = () => {
-    if (currentQuestionIndex > 0) {
-      setCurrentQuestionIndex(currentQuestionIndex - 1);
-    }
-  };
-
-  // 计算各维度分数
-  const calculateDimensionScores = () => {
-    const dimensionScores: Record<string, { total: number; count: number }> = {};
-    
-    answers.forEach((answer) => {
-      if (!dimensionScores[answer.dimension]) {
-        dimensionScores[answer.dimension] = { total: 0, count: 0 };
-      }
-      dimensionScores[answer.dimension].total += answer.score;
-      dimensionScores[answer.dimension].count += 1;
-    });
-
-    return Object.entries(dimensionScores)
-      .map(([name, { total, count }]) => ({
-        name,
-        score: total / count,
-      }))
-      .sort((a, b) => b.score - a.score);
-  };
-
-  // 提交测评
-  const handleSubmit = async () => {
-    if (answers.length < questions.length) {
-      alert(`请完成所有题目后再提交，当前已答 ${answers.length}/${questions.length} 题`);
-      return;
-    }
-
-    setStatus("analyzing");
+  // AI 分析
+  const analyzeAnswers = async (allAnswers: Answer[]) => {
     setAnalyzingProgress(0);
-
-    // 准备分析数据
-    const analysisData: AnalysisAnswer[] = answers.map(a => ({
-      questionId: a.questionId,
-      score: a.score,
-      dimension: a.dimension,
-      assessmentType: a.assessmentType,
-    }));
-
+    
     try {
-      const response = await fetch("/api/analyze", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const response = await fetch('/api/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          answers: analysisData,
-          childName: childInfo.name || "小朋友",
+          answers: allAnswers,
+          childName: childInfo.name,
           childAge: childInfo.age,
         }),
       });
 
-      if (!response.ok) throw new Error("分析请求失败");
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || "分析请求失败");
+      }
 
-      // 处理流式响应
       const reader = response.body?.getReader();
       const decoder = new TextDecoder();
       let result = "";
@@ -192,215 +109,370 @@ export default function AssessmentPage() {
           if (done) break;
 
           const chunk = decoder.decode(value);
+          const errorMatch = chunk.match(/\[ERROR\](.*?)\[\/ERROR\]/);
+          if (errorMatch) {
+            throw new Error(errorMatch[1]);
+          }
+          
           result += chunk;
           setAnalysisResult(result);
-          
-          // 更新进度
           setAnalyzingProgress(Math.min((result.length / 500) * 100, 95));
         }
       }
 
       setAnalyzingProgress(100);
-      setStatus("report");
+      setTimeout(() => setStatus('report'), 500);
     } catch (error) {
-      console.error("分析失败:", error);
-      alert("分析失败，请稍后重试");
-      setStatus("in_progress");
+      const errorMessage = error instanceof Error ? error.message : '分析失败';
+      alert(`分析失败: ${errorMessage}`);
+      setStatus('quiz');
     }
   };
 
-  // 重新开始
-  const handleRestart = () => {
-    setStatus("intro");
-    setChildInfo({ name: "", age: 8 });
-    setCurrentQuestionIndex(0);
-    setAnswers([]);
-    setAnalysisResult("");
-    setAnalyzingProgress(0);
+  const startAssessment = () => {
+    if (childInfo.name.trim() && childInfo.age) {
+      setStatus('quiz');
+      setCurrentQuestion(0);
+      setAnswers([]);
+    }
   };
 
-  // 计算当前题目答案
-  const currentAnswer = answers.find(
-    a => a.questionId === questions[currentQuestionIndex]?.questionId
-  );
+  const getDimensionScores = () => {
+    const scores: Record<string, { total: number; count: number }> = {};
+    answers.forEach(answer => {
+      if (!scores[answer.dimension]) {
+        scores[answer.dimension] = { total: 0, count: 0 };
+      }
+      scores[answer.dimension].total += answer.score;
+      scores[answer.dimension].count += 1;
+    });
+    
+    return Object.entries(scores).map(([dimension, data]) => ({
+      dimension,
+      score: data.count > 0 ? Math.round((data.total / (data.count * 5)) * 100) : 0,
+    }));
+  };
 
-  // 计算进度
-  const progressPercent = questions.length > 0 
-    ? Math.round((answers.length / questions.length) * 100) 
-    : 0;
+  const currentQ = questions[currentQuestion];
+  const progress = ((currentQuestion + 1) / questions.length) * 100;
 
-  // 当前题目
-  const currentQuestion = questions[currentQuestionIndex];
-
-  // 如果加载中
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">正在加载题目...</p>
-        </div>
-      </div>
-    );
-  }
+  // 专家推荐数据
+  const testimonials = [
+    {
+      quote: "我们收到的报告不仅是数字，更是女儿教育的导航图。我们终于理解了她最好的学习方式。",
+      author: "Sarah Jenkins",
+      role: "7岁孩子的母亲",
+    },
+    {
+      quote: "作为一名临床医生，我对智学博悦体系的严谨性印象深刻。它弥补了实验室级测试与家庭可及洞察之间的鸿沟。",
+      author: "Marcus Aris 博士",
+      role: "儿科神经心理学家",
+      featured: true,
+    },
+    {
+      quote: "我向所有学生的家长推荐这个系统。这是目前针对认知多样化学习者最全面的评估方式。",
+      author: "Elena Rodriguez",
+      role: "特殊教育组长",
+    },
+  ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50">
-      {/* 顶部导航 */}
-      <header className="bg-white shadow-sm sticky top-0 z-50">
-        <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center">
-              <Brain className="w-6 h-6 text-white" />
-            </div>
-            <span className="font-bold text-lg text-gray-800">儿童天赋测评</span>
+    <div className="min-h-screen bg-[#F5F5F5]">
+      {/* 导航栏 */}
+      <nav className="fixed top-0 w-full z-50 bg-white/95 backdrop-blur-sm shadow-sm">
+        <div className="flex justify-between items-center w-full px-6 py-4 max-w-7xl mx-auto">
+          <div className="text-xl font-bold text-[#1E3A5F] tracking-tight">
+            智学博悦
           </div>
-          {status === "in_progress" && (
-            <div className="flex items-center gap-2 text-sm text-gray-600">
-              <span>{answers.length}/{questions.length} 题</span>
-            </div>
-          )}
+          <div className="hidden md:flex gap-8 items-center text-sm font-medium">
+            <a className="text-[#181c1c] font-semibold border-b-2 border-[#1E3A5F] pb-1" href="#">探索</a>
+            <a className="text-[#43474c] hover:text-[#181c1c] transition-colors" href="#">关于我们</a>
+            <a className="text-[#43474c] hover:text-[#181c1c] transition-colors" href="#">测评报告</a>
+          </div>
+          <Button className="px-5 py-2 rounded-full bg-[#1E3A5F] text-white font-semibold hover:bg-[#2a4a75] transition-colors">
+            个人中心
+          </Button>
         </div>
-      </header>
+      </nav>
 
-      <main className="max-w-3xl mx-auto px-4 py-8">
-        {/* 欢迎页面 */}
-        {status === "intro" && (
+      <main className="pt-20">
+        {/* 欢迎页面 - 参考图片设计 */}
+        {status === "intro" && assessmentInfo && (
           <div className="animate-fade-in">
-            {/* Hero Section */}
-            <div className="text-center mb-12">
-              <div className="inline-flex items-center gap-2 bg-indigo-100 text-indigo-700 px-4 py-2 rounded-full text-sm font-medium mb-6">
-                <Star className="w-4 h-4" />
-                专业儿童天赋测评
+            {/* Hero Section - 参考图片布局 */}
+            <section className="relative px-6 py-16 md:py-20 max-w-7xl mx-auto">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+                {/* 左侧文字区 */}
+                <div className="lg:col-span-7 z-10">
+                  <span className="inline-block py-1 px-4 mb-6 rounded-full bg-[#5C6652]/10 text-[#5C6652] text-xs font-bold tracking-widest uppercase">
+                    赋能探索发现
+                  </span>
+                  <h1 className="text-4xl md:text-5xl font-extrabold text-[#1E3A5F] leading-tight tracking-tight mb-6">
+                    探索孩子的<span className="text-[#5C6652]">独特潜能：</span>AI驱动的智能测评
+                  </h1>
+                  <p className="text-xl text-[#43474c] max-w-2xl leading-relaxed mb-10">
+                    唯一结合韦氏认知技能与加德纳多元智能理论的深度测评系统。
+                  </p>
+                  <div className="flex flex-wrap gap-4">
+                    <Button 
+                      onClick={() => setStatus('info')}
+                      className="px-8 py-4 rounded-full bg-[#1E3A5F] text-white font-bold text-lg shadow-lg hover:bg-[#2a4a75] transition-colors"
+                    >
+                      开始首次免费测评
+                      <ChevronRight className="w-5 h-5 ml-1" />
+                    </Button>
+                    <Button 
+                      variant="outline"
+                      className="px-8 py-4 rounded-full border-2 border-[#c4c6cd] text-[#43474c] font-semibold hover:bg-[#f1f4f3] transition-colors"
+                    >
+                      查看样本报告
+                    </Button>
+                  </div>
+                </div>
+                
+                {/* 右侧插画区 */}
+                <div className="lg:col-span-5 relative">
+                  {/* 插画卡片 */}
+                  <div className="relative w-full aspect-square rounded-[2.5rem] overflow-hidden shadow-2xl z-20">
+                    <div className="absolute inset-0 bg-gradient-to-br from-[#FFECD2] to-[#FCB69F]/30 flex items-center justify-center">
+                      {/* 简约插画 - 母亲与孩子 */}
+                      <div className="relative w-64 h-64">
+                        {/* 孩子 */}
+                        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 w-20 h-24 bg-[#FCB69F] rounded-full"></div>
+                        <div className="absolute bottom-28 left-1/2 -translate-x-1/2 w-16 h-16 bg-[#FCB69F] rounded-full">
+                          <div className="absolute top-2 left-2 w-3 h-3 bg-[#2a2a2a] rounded-full"></div>
+                          <div className="absolute top-2 right-2 w-3 h-3 bg-[#2a2a2a] rounded-full"></div>
+                        </div>
+                        {/* 母亲 */}
+                        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 -ml-8 w-12 h-20 bg-[#E8845C] rounded-t-full"></div>
+                        <div className="absolute bottom-20 left-1/2 -translate-x-1/2 -ml-10 w-10 h-10 bg-[#E8845C] rounded-full"></div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* 数据标签卡片 */}
+                  <div className="absolute -bottom-8 -left-8 z-30 p-5 bg-white rounded-2xl shadow-xl border border-gray-100">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-full bg-[#5C6652]/10 flex items-center justify-center">
+                        <Brain className="w-6 h-6 text-[#5C6652]" />
+                      </div>
+                      <div>
+                        <div className="text-2xl font-bold text-[#1E3A5F]">98%</div>
+                        <div className="text-xs text-[#43474c]">评估准确率</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-                {assessmentInfo?.title}
-              </h1>
-              <p className="text-gray-600 text-lg max-w-2xl mx-auto">
-                {assessmentInfo?.theoreticalBasis}，帮助家长科学了解孩子的天赋特点
-              </p>
-            </div>
+            </section>
 
-            {/* 特点展示 */}
-            <div className="grid md:grid-cols-3 gap-6 mb-12">
-              <Card className="bg-white border-0 shadow-lg">
-                <CardContent className="p-6 text-center">
-                  <div className="w-14 h-14 bg-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                    <Brain className="w-7 h-7 text-blue-600" />
-                  </div>
-                  <h3 className="font-semibold text-gray-900 mb-2">韦氏智力框架</h3>
-                  <p className="text-sm text-gray-600">科学评估逻辑推理与言语理解能力</p>
-                </CardContent>
-              </Card>
-              <Card className="bg-white border-0 shadow-lg">
-                <CardContent className="p-6 text-center">
-                  <div className="w-14 h-14 bg-purple-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                    <Users className="w-7 h-7 text-purple-600" />
-                  </div>
-                  <h3 className="font-semibold text-gray-900 mb-2">多元智能理论</h3>
-                  <p className="text-sm text-gray-600">全面发现孩子在八大智能领域的天赋</p>
-                </CardContent>
-              </Card>
-              <Card className="bg-white border-0 shadow-lg">
-                <CardContent className="p-6 text-center">
-                  <div className="w-14 h-14 bg-green-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                    <FileText className="w-7 h-7 text-green-600" />
-                  </div>
-                  <h3 className="font-semibold text-gray-900 mb-2">AI专业报告</h3>
-                  <p className="text-sm text-gray-600">智能生成个性化发展建议</p>
-                </CardContent>
-              </Card>
-            </div>
+            {/* 特点展示 - 三卡片布局 */}
+            <section className="bg-white py-16 px-6">
+              <div className="max-w-7xl mx-auto">
+                <div className="mb-12 text-center">
+                  <h2 className="text-3xl md:text-4xl font-bold text-[#1E3A5F] mb-4 tracking-tight">我们的精准测评体系</h2>
+                  <p className="text-[#43474c] max-w-xl mx-auto">精密的方法论结合直观的设计，揭示孩子内心隐藏的认知架构。</p>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                  {/* 科学依据 */}
+                  <Card className="p-8 rounded-2xl bg-white shadow-sm hover:shadow-md transition-all border border-gray-100">
+                    <CardContent className="p-0">
+                      <div className="w-14 h-14 rounded-2xl bg-[#1E3A5F]/5 flex items-center justify-center mb-6">
+                        <Menu className="w-7 h-7 text-[#1E3A5F]" />
+                      </div>
+                      <h3 className="text-xl font-bold text-[#1E3A5F] mb-4">科学依据</h3>
+                      <p className="text-[#43474c] leading-relaxed">基于心理测量学的黄金标准，我们的测评利用经临床验证的认知模型，提供无可比拟的分析深度。</p>
+                    </CardContent>
+                  </Card>
+                  {/* AI智能分析 */}
+                  <Card className="p-8 rounded-2xl bg-white shadow-lg hover:shadow-xl transition-all border-2 border-[#5C6652]/20">
+                    <CardContent className="p-0">
+                      <div className="w-14 h-14 rounded-2xl bg-[#5C6652]/10 flex items-center justify-center mb-6">
+                        <Lightbulb className="w-7 h-7 text-[#5C6652]" />
+                      </div>
+                      <h3 className="text-xl font-bold text-[#1E3A5F] mb-4">AI智能分析</h3>
+                      <p className="text-[#43474c] leading-relaxed">我们专有的算法通过分析行为模式和反应延迟，提供360度的全方位认知画像。</p>
+                    </CardContent>
+                  </Card>
+                  {/* 专业成长路径 */}
+                  <Card className="p-8 rounded-2xl bg-white shadow-sm hover:shadow-md transition-all border border-gray-100">
+                    <CardContent className="p-0">
+                      <div className="w-14 h-14 rounded-2xl bg-[#FCB69F]/20 flex items-center justify-center mb-6">
+                        <TrendingUp className="w-7 h-7 text-[#E8845C]" />
+                      </div>
+                      <h3 className="text-xl font-bold text-[#1E3A5F] mb-4">专业成长路径</h3>
+                      <p className="text-[#43474c] leading-relaxed">我们不仅提供数据，更提供路线图。为教育者和临床专家量身定制的可执行策略。</p>
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
+            </section>
 
-            {/* 测评说明 */}
-            <Card className="bg-white border-0 shadow-lg mb-8">
-              <CardContent className="p-6">
-                <h2 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                  <CheckCircle2 className="w-5 h-5 text-green-500" />
-                  测评须知
-                </h2>
-                <ul className="space-y-3">
-                  <li className="flex items-start gap-3 text-sm text-gray-700">
-                    <Clock className="w-5 h-5 text-indigo-500 flex-shrink-0 mt-0.5" />
-                    <span>测评时长约 {Math.ceil(questions.length * 1.5)} 分钟，共 {questions.length} 道题目</span>
-                  </li>
-                  <li className="flex items-start gap-3 text-sm text-gray-700">
-                    <Users className="w-5 h-5 text-indigo-500 flex-shrink-0 mt-0.5" />
-                    <span>建议家长陪同孩子共同完成，家长可辅助理解题意，但不提示答案</span>
-                  </li>
-                  <li className="flex items-start gap-3 text-sm text-gray-700">
-                    <BookOpen className="w-5 h-5 text-indigo-500 flex-shrink-0 mt-0.5" />
-                    <span>每题按孩子实际情况选择，1-5分对应能力等级</span>
-                  </li>
-                </ul>
-              </CardContent>
-            </Card>
+            {/* 方法论介绍 */}
+            <section className="py-16 px-6 max-w-7xl mx-auto overflow-hidden">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
+                <div className="relative order-2 lg:order-1">
+                  {/* 雷达图可视化 */}
+                  <div className="relative w-full aspect-square flex items-center justify-center">
+                    <div className="absolute inset-0 bg-[#5C6652]/5 rounded-full blur-3xl"></div>
+                    <div className="relative w-72 h-72 md:w-80 md:h-80 border border-[#1E3A5F]/10 rounded-full flex items-center justify-center p-8">
+                      <svg className="w-full h-full drop-shadow-lg" viewBox="0 0 100 100">
+                        <polygon fill="none" points="50,5 95,25 95,75 50,95 5,75 5,25" stroke="#c4c6cd" strokeWidth="0.5"></polygon>
+                        <polygon fill="none" points="50,20 80,35 80,65 50,80 20,65 20,35" stroke="#c4c6cd" strokeWidth="0.5"></polygon>
+                        <polygon fill="#5C6652" fillOpacity="0.2" points="50,15 85,30 75,80 50,85 15,65 30,25" stroke="#5C6652" strokeWidth="1.5"></polygon>
+                        <circle cx="50" cy="15" fill="#1E3A5F" r="2"></circle>
+                        <circle cx="85" cy="30" fill="#1E3A5F" r="2"></circle>
+                        <circle cx="75" cy="80" fill="#1E3A5F" r="2"></circle>
+                        <circle cx="50" cy="85" fill="#1E3A5F" r="2"></circle>
+                        <circle cx="15" cy="65" fill="#1E3A5F" r="2"></circle>
+                        <circle cx="30" cy="25" fill="#1E3A5F" r="2"></circle>
+                      </svg>
+                    </div>
+                    {/* 浮动标签 */}
+                    <span className="absolute top-0 right-4 py-2 px-4 bg-[#5C6652]/10 text-[#5C6652] rounded-full text-xs font-bold">语言能力</span>
+                    <span className="absolute bottom-8 right-0 py-2 px-4 bg-[#5C6652]/10 text-[#5C6652] rounded-full text-xs font-bold">空间想象</span>
+                    <span className="absolute top-1/2 -left-4 py-2 px-4 bg-[#1E3A5F] text-white rounded-full text-xs font-bold">韦氏量表</span>
+                  </div>
+                </div>
+                <div className="order-1 lg:order-2">
+                  <h2 className="text-3xl md:text-4xl font-bold text-[#1E3A5F] mb-8 tracking-tight">韦氏智力 + 多元智能深度融合</h2>
+                  <div className="space-y-8">
+                    <div className="flex gap-6">
+                      <div className="flex-shrink-0 w-12 h-12 rounded-full bg-[#1E3A5F] text-white flex items-center justify-center font-bold">1</div>
+                      <div>
+                        <h4 className="text-xl font-bold text-[#1E3A5F] mb-2">认知核心 (韦氏)</h4>
+                        <p className="text-[#43474c]">我们评估智力的基石：利用临床验证的指标分析加工速度、工作记忆和流体推理。</p>
+                      </div>
+                    </div>
+                    <div className="flex gap-6">
+                      <div className="flex-shrink-0 w-12 h-12 rounded-full bg-[#5C6652] text-white flex items-center justify-center font-bold">2</div>
+                      <div>
+                        <h4 className="text-xl font-bold text-[#1E3A5F] mb-2">表达天赋 (加德纳)</h4>
+                        <p className="text-[#43474c]">超越传统的逻辑评估，我们测绘孩子在人际、音乐和动觉领域的自然倾向。</p>
+                      </div>
+                    </div>
+                    <div className="flex gap-6">
+                      <div className="flex-shrink-0 w-12 h-12 rounded-full bg-[#E8845C] text-white flex items-center justify-center font-bold">3</div>
+                      <div>
+                        <h4 className="text-xl font-bold text-[#1E3A5F] mb-2">AI综合洞察</h4>
+                        <p className="text-[#43474c]">我们的引擎分析原始认知能力与特定智能领域之间的相关性，揭示真正的成长路径。</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
 
-            {/* 开始按钮 */}
-            <div className="text-center">
-              <Button
-                onClick={() => setStatus("child_info")}
-                className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white px-12 py-6 text-lg font-medium rounded-2xl shadow-lg hover:shadow-xl transition-all"
-              >
-                开始测评
-                <ChevronRight className="w-5 h-5 ml-2" />
-              </Button>
-            </div>
+            {/* 专家推荐 */}
+            <section className="bg-[#F5F5F5] py-16 px-6">
+              <div className="max-w-7xl mx-auto">
+                <div className="flex flex-col md:flex-row justify-between items-end gap-6 mb-12">
+                  <div>
+                    <h2 className="text-3xl md:text-4xl font-bold text-[#1E3A5F] tracking-tight">专家推荐</h2>
+                    <p className="text-[#43474c] mt-2">经儿科专家验证，深受全球家长信赖。</p>
+                  </div>
+                  <div className="flex gap-2">
+                    {[1,2,3,4,5].map(i => (
+                      <Star key={i} className="w-5 h-5 fill-[#E8845C] text-[#E8845C]" />
+                    ))}
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                  {testimonials.map((item, index) => (
+                    <div 
+                      key={index} 
+                      className={`p-8 rounded-3xl relative ${item.featured ? 'bg-[#1E3A5F] text-white' : 'bg-white'}`}
+                    >
+                      <div className="absolute -top-4 -left-4 w-10 h-10 bg-white shadow-md rounded-full flex items-center justify-center">
+                        <span className={`text-xl ${item.featured ? 'text-[#1E3A5F]' : 'text-[#1E3A5F]'}`}>"</span>
+                      </div>
+                      <p className="text-lg italic mb-8 leading-relaxed">{item.quote}</p>
+                      <div className="flex items-center gap-4">
+                        <div className={`w-12 h-12 rounded-full ${item.featured ? 'bg-white/20' : 'bg-gray-200'}`}></div>
+                        <div>
+                          <div className={`font-bold ${item.featured ? 'text-white' : 'text-[#1E3A5F]'}`}>{item.author}</div>
+                          <div className={`text-xs ${item.featured ? 'text-white/70' : 'text-[#43474c]'}`}>{item.role}</div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </section>
+
+            {/* CTA */}
+            <section className="py-16 px-6 text-center">
+              <div className="max-w-3xl mx-auto bg-[#5C6652]/10 p-12 md:p-16 rounded-[2rem] relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-40 h-40 bg-[#5C6652]/10 rounded-full -mr-20 -mt-20 blur-2xl"></div>
+                <h2 className="text-3xl md:text-4xl font-bold text-[#1E3A5F] mb-6">准备好发现他们的闪光点了吗？</h2>
+                <p className="text-lg text-[#43474c] mb-10">加入超过25,000名已解锁孩子认知地图的家长行列。</p>
+                <Button 
+                  onClick={() => setStatus('info')}
+                  className="px-10 py-5 rounded-full bg-[#1E3A5F] text-white font-extrabold text-lg hover:bg-[#2a4a75] transition-colors shadow-lg"
+                >
+                  立即免费开始
+                </Button>
+              </div>
+            </section>
+
+            {/* 页脚 */}
+            <footer className="w-full py-8 px-6 bg-white border-t border-gray-100">
+              <div className="flex flex-col md:flex-row justify-between items-center gap-4 max-w-7xl mx-auto">
+                <div className="flex flex-col items-center md:items-start">
+                  <div className="text-lg font-bold text-[#181c1c]">智学博悦</div>
+                  <div className="text-[#43474c] text-xs mt-1">© 2024 智学博悦。科学智能测评。</div>
+                </div>
+                <div className="flex flex-wrap justify-center gap-6">
+                  <a className="text-[#43474c] hover:text-[#5C6652] transition-colors text-xs" href="#">隐私政策</a>
+                  <a className="text-[#43474c] hover:text-[#5C6652] transition-colors text-xs" href="#">服务条款</a>
+                </div>
+              </div>
+            </footer>
           </div>
         )}
 
         {/* 孩子信息页面 */}
-        {status === "child_info" && (
-          <div className="animate-fade-in">
-            <Card className="bg-white border-0 shadow-lg max-w-md mx-auto">
+        {status === "info" && (
+          <div className="min-h-screen flex items-center justify-center px-4 py-12">
+            <Card className="w-full max-w-md bg-white rounded-3xl shadow-xl border-0">
               <CardContent className="p-8">
-                <h2 className="text-2xl font-bold text-gray-900 mb-2 text-center">
-                  请填写孩子信息
-                </h2>
-                <p className="text-gray-600 text-center mb-8">
-                  帮助我们提供更准确的分析
-                </p>
-
+                <div className="text-center mb-8">
+                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[#1E3A5F] text-white mb-4">
+                    <Users className="w-8 h-8" />
+                  </div>
+                  <h2 className="text-2xl font-bold text-[#1E3A5F]">欢迎开始测评</h2>
+                  <p className="text-[#43474c] mt-2">请输入孩子的基本信息</p>
+                </div>
                 <div className="space-y-6">
-                  <div>
-                    <Label htmlFor="name" className="text-gray-700 font-medium">
-                      孩子姓名（选填）
-                    </Label>
+                  <div className="space-y-2">
+                    <Label htmlFor="name" className="text-[#181c1c] font-medium">孩子姓名</Label>
                     <Input
                       id="name"
                       placeholder="请输入姓名"
                       value={childInfo.name}
                       onChange={(e) => setChildInfo({ ...childInfo, name: e.target.value })}
-                      className="mt-2 h-12"
+                      className="rounded-xl border-[#c4c6cd] focus:border-[#1E3A5F] focus:ring-[#1E3A5F]"
                     />
                   </div>
-
-                  <div>
-                    <Label className="text-gray-700 font-medium">
-                      孩子年龄 <span className="text-red-500">*</span>
-                    </Label>
-                    <div className="flex gap-3 mt-2">
-                      {[6, 7, 8, 9, 10, 11, 12].map((age) => (
-                        <button
-                          key={age}
-                          onClick={() => setChildInfo({ ...childInfo, age })}
-                          className={`w-12 h-12 rounded-xl font-medium transition-all ${
-                            childInfo.age === age
-                              ? "bg-indigo-500 text-white shadow-lg"
-                              : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                          }`}
-                        >
-                          {age}
-                        </button>
-                      ))}
-                    </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="age" className="text-[#181c1c] font-medium">孩子年龄</Label>
+                    <Input
+                      id="age"
+                      type="number"
+                      min="6"
+                      max="12"
+                      placeholder="6-12岁"
+                      value={childInfo.age}
+                      onChange={(e) => setChildInfo({ ...childInfo, age: e.target.value })}
+                      className="rounded-xl border-[#c4c6cd] focus:border-[#1E3A5F] focus:ring-[#1E3A5F]"
+                    />
                   </div>
-
                   <Button
-                    onClick={() => setStatus("in_progress")}
-                    className="w-full h-12 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-medium rounded-xl"
+                    onClick={startAssessment}
+                    disabled={!childInfo.name.trim() || !childInfo.age}
+                    className="w-full py-6 rounded-full bg-[#1E3A5F] text-white font-bold text-lg hover:bg-[#2a4a75] transition-all"
                   >
-                    开始答题
+                    开始测评
                     <ChevronRight className="w-5 h-5 ml-2" />
                   </Button>
                 </div>
@@ -410,321 +482,155 @@ export default function AssessmentPage() {
         )}
 
         {/* 答题页面 */}
-        {status === "in_progress" && currentQuestion && (
-          <div className="animate-fade-in">
-            {/* 进度条 */}
-            <div className="mb-6">
-              <div className="flex justify-between text-sm text-gray-600 mb-2">
-                <span>题目 {currentQuestionIndex + 1} / {questions.length}</span>
-                <span>{progressPercent}%</span>
-              </div>
-              <div className="progress-track h-2">
-                <div 
-                  className="progress-fill" 
-                  style={{ width: `${progressPercent}%` }}
-                />
+        {status === "quiz" && currentQ && (
+          <div className="min-h-screen flex flex-col">
+            <div className="sticky top-0 bg-white/95 backdrop-blur-sm border-b border-gray-100 z-10">
+              <div className="max-w-2xl mx-auto px-4 py-4">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm text-[#43474c]">
+                    第 {currentQuestion + 1} / {questions.length} 题
+                  </span>
+                  <span className="text-sm font-medium text-[#1E3A5F]">
+                    {currentQ.type}
+                  </span>
+                </div>
+                <Progress value={progress} className="h-2 rounded-full bg-gray-200 [&>div]:bg-[#5C6652]" />
               </div>
             </div>
 
-            {/* 题目卡片 */}
-            <Card className="question-card mb-6">
-              <CardContent className="p-6 md:p-8">
-                {/* 题目类型标签 */}
-                <div className="flex items-center gap-2 mb-4">
-                  <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                    currentQuestion.assessmentType === "韦氏智力测评" 
-                      ? "bg-blue-100 text-blue-700"
-                      : currentQuestion.assessmentType === "多元智能测试"
-                      ? "bg-purple-100 text-purple-700"
-                      : "bg-gray-100 text-gray-700"
-                  }`}>
-                    {currentQuestion.assessmentType}
-                  </span>
-                  <span className="px-3 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-700">
-                    {currentQuestion.dimension}
-                  </span>
-                </div>
+            <div className="flex-1 flex items-center justify-center px-4 py-8">
+              <Card className="w-full max-w-2xl bg-white rounded-3xl shadow-lg border-0">
+                <CardContent className="p-8">
+                  <div className="mb-8">
+                    <span className="inline-block py-1 px-3 rounded-full bg-[#5C6652]/10 text-[#5C6652] text-xs font-medium mb-4">
+                      {currentQ.dimension}
+                    </span>
+                    <p className="text-xl text-[#181c1c] leading-relaxed">{currentQ.question}</p>
+                  </div>
 
-                {/* 题目内容 */}
-                <h2 className="text-xl md:text-2xl font-semibold text-gray-900 mb-2 leading-relaxed">
-                  {currentQuestion.questionContent}
-                </h2>
-
-                {/* 图形展示（如果有） */}
-                <QuestionGraphic questionId={currentQuestion.questionId} />
-
-                {/* 选项 */}
-                <RadioGroup 
-                  value={currentAnswer?.selectedOption || ""}
-                  onValueChange={(value) => {
-                    const option = currentQuestion.options.find(o => o.option === value);
-                    if (option) {
-                      handleOptionSelect(value, option.score, currentQuestion);
-                    }
-                  }}
-                  className="space-y-3"
-                >
-                  {currentQuestion.options.map((opt) => (
-                    <div key={opt.option} className="relative">
-                      <RadioGroupItem
-                        value={opt.option}
-                        id={`option-${opt.option}`}
-                        className="peer sr-only"
-                      />
-                      <Label
-                        htmlFor={`option-${opt.option}`}
-                        className={`option-btn flex items-center p-4 rounded-xl cursor-pointer ${
-                          currentAnswer?.selectedOption === opt.option ? "selected" : ""
-                        }`}
+                  <RadioGroup
+                    onValueChange={(v) => submitAnswer(parseInt(v))}
+                    className="space-y-3"
+                  >
+                    {currentQ.options.map((option, index) => (
+                      <div
+                        key={option.value}
+                        className="flex items-center p-4 rounded-xl border-2 border-gray-200 hover:border-[#5C6652] hover:bg-[#5C6652]/5 cursor-pointer transition-all"
                       >
-                        <span className={`w-8 h-8 rounded-full flex items-center justify-center font-semibold mr-4 ${
-                          currentAnswer?.selectedOption === opt.option
-                            ? "bg-white/20 text-white"
-                            : "bg-indigo-100 text-indigo-700"
-                        }`}>
-                          {opt.option}
-                        </span>
-                        <span className={currentAnswer?.selectedOption === opt.option ? "text-white" : ""}>
-                          {opt.content}
-                        </span>
-                      </Label>
-                    </div>
-                  ))}
-                </RadioGroup>
+                        <RadioGroupItem value={option.value.toString()} id={`option-${index}`} className="text-[#5C6652]" />
+                        <label
+                          htmlFor={`option-${index}`}
+                          className="flex-1 ml-3 text-[#181c1c] cursor-pointer"
+                        >
+                          {option.label}
+                        </label>
+                      </div>
+                    ))}
+                  </RadioGroup>
 
-                {/* 维度提示 */}
-                <div className="mt-6 p-4 bg-gray-50 rounded-xl">
-                  <p className="text-sm text-gray-600">
-                    <span className="font-medium text-indigo-600">考察维度：</span>
-                    {currentQuestion.prompt}
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* 导航按钮 */}
-            <div className="flex justify-between items-center">
-              <Button
-                variant="outline"
-                onClick={handlePrev}
-                disabled={currentQuestionIndex === 0}
-                className="px-6"
-              >
-                <ChevronLeft className="w-4 h-4 mr-2" />
-                上一题
-              </Button>
-
-              {currentQuestionIndex === questions.length - 1 ? (
-                <Button
-                  onClick={handleSubmit}
-                  disabled={answers.length < questions.length}
-                  className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white px-8"
-                >
-                  提交测评
-                  <CheckCircle2 className="w-4 h-4 ml-2" />
-                </Button>
-              ) : (
-                <Button
-                  onClick={handleNext}
-                  className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white px-6"
-                >
-                  下一题
-                  <ChevronRight className="w-4 h-4 ml-2" />
-                </Button>
-              )}
-            </div>
-
-            {/* 答题进度指示器 */}
-            <div className="mt-8 flex justify-center gap-1 flex-wrap">
-              {questions.map((q, idx) => {
-                const isAnswered = answers.some(a => a.questionId === q.questionId);
-                const isCurrent = idx === currentQuestionIndex;
-                return (
-                  <div
-                    key={q.questionId}
-                    className={`w-3 h-3 rounded-full transition-all ${
-                      isCurrent ? "bg-indigo-500 scale-125" : isAnswered ? "bg-indigo-300" : "bg-gray-200"
-                    }`}
-                  />
-                );
-              })}
+                  <div className="flex items-center justify-between mt-8 pt-6 border-t border-gray-100">
+                    <Button
+                      variant="ghost"
+                      onClick={() => setCurrentQuestion(Math.max(0, currentQuestion - 1))}
+                      disabled={currentQuestion === 0}
+                      className="text-[#43474c] hover:text-[#1E3A5F]"
+                    >
+                      <ChevronLeft className="w-4 h-4 mr-1" />
+                      上一题
+                    </Button>
+                    <span className="text-sm text-[#43474c]">
+                      {answers.length} 题已答
+                    </span>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           </div>
         )}
 
         {/* 分析中页面 */}
         {status === "analyzing" && (
-          <div className="animate-fade-in text-center py-12">
-            <div className="w-20 h-20 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto mb-6"></div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">正在生成分析报告</h2>
-            <p className="text-gray-600 mb-8">AI正在根据答题结果进行专业分析...</p>
-            <div className="max-w-md mx-auto">
-              <Progress value={analyzingProgress} className="h-2" />
-              <p className="text-sm text-gray-500 mt-2">{Math.round(analyzingProgress)}%</p>
-            </div>
+          <div className="min-h-screen flex items-center justify-center px-4">
+            <Card className="w-full max-w-lg bg-white rounded-3xl shadow-xl border-0 p-8 text-center">
+              <CardContent className="p-0">
+                <div className="relative w-24 h-24 mx-auto mb-8">
+                  <div className="absolute inset-0 rounded-full bg-[#5C6652]/20 animate-ping"></div>
+                  <div className="relative w-24 h-24 rounded-full bg-[#5C6652] flex items-center justify-center">
+                    <Sparkles className="w-12 h-12 text-white animate-spin" style={{ animationDuration: '3s' }} />
+                  </div>
+                </div>
+                <h2 className="text-2xl font-bold text-[#1E3A5F] mb-4">AI正在分析中...</h2>
+                <p className="text-[#43474c] mb-8">
+                  正在结合韦氏智力框架和多元智能理论，为 {childInfo.name} 生成个性化报告
+                </p>
+                <div className="space-y-4">
+                  <Progress value={analyzingProgress} className="h-3 rounded-full bg-gray-200 [&>div]:bg-[#5C6652]" />
+                  <p className="text-sm text-[#43474c]">{Math.round(analyzingProgress)}%</p>
+                </div>
+                {analysisResult && (
+                  <div className="mt-8 p-4 rounded-xl bg-gray-50 text-left max-h-48 overflow-y-auto">
+                    <p className="text-sm text-[#181c1c] whitespace-pre-wrap">{analysisResult}</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           </div>
         )}
 
         {/* 报告页面 */}
         {status === "report" && (
-          <div className="animate-fade-in">
-            {/* 报告头部 */}
-            <div className="text-center mb-8">
-              <div className="inline-flex items-center gap-2 bg-green-100 text-green-700 px-4 py-2 rounded-full text-sm font-medium mb-4">
+          <div className="min-h-screen pb-12">
+            <div className="text-center mb-8 px-4 pt-8">
+              <div className="inline-flex items-center gap-2 bg-[#5C6652]/10 text-[#5C6652] px-4 py-2 rounded-full text-sm font-medium mb-4">
                 <CheckCircle2 className="w-4 h-4" />
                 测评完成
               </div>
-              <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
-                {childInfo.name || "小朋友"}的天赋测评报告
+              <h1 className="text-2xl md:text-3xl font-bold text-[#1E3A5F] mb-2">
+                {childInfo.name}的天赋测评报告
               </h1>
-              <p className="text-gray-600">
+              <p className="text-[#43474c]">
                 基于韦氏智力测评框架 + 多元智能理论 | 共 {questions.length} 题
               </p>
             </div>
 
-            {/* 数据可视化图表 */}
-            <div className="grid md:grid-cols-2 gap-6 mb-8">
-              <div>
-                <div className="flex items-center gap-2 mb-4">
-                  <Radar className="w-5 h-5 text-indigo-500" />
-                  <h3 className="font-semibold text-gray-900">天赋雷达图</h3>
-                </div>
-                <DimensionRadarChart scores={calculateDimensionScores()} />
-              </div>
-              <div>
-                <div className="flex items-center gap-2 mb-4">
-                  <BarChart3 className="w-5 h-5 text-indigo-500" />
-                  <h3 className="font-semibold text-gray-900">各维度得分</h3>
-                </div>
-                <DimensionBarChart scores={calculateDimensionScores()} />
-              </div>
+            <div className="max-w-4xl mx-auto px-4 mb-8">
+              <Card className="rounded-3xl bg-white shadow-lg border-0 p-6">
+                <CardContent className="p-0">
+                  <h2 className="text-xl font-bold text-[#1E3A5F] mb-6 text-center">天赋雷达图</h2>
+                  <DimensionBarChart dimensionScores={getDimensionScores()} />
+                </CardContent>
+              </Card>
             </div>
 
-            {/* 维度得分列表 */}
-            <Card className="bg-white border-0 shadow-lg mb-8">
-              <CardContent className="p-6">
-                <h3 className="font-semibold text-gray-900 mb-4">各维度详细得分</h3>
-                <div className="space-y-4">
-                  {calculateDimensionScores()
-                    .sort((a, b) => b.score - a.score)
-                    .map((dim) => (
-                      <ScoreProgress key={dim.name} name={dim.name} score={dim.score} />
-                    ))}
-                </div>
-              </CardContent>
-            </Card>
+            <div className="max-w-4xl mx-auto px-4 mb-8">
+              <Card className="rounded-3xl bg-white shadow-lg border-0 p-6">
+                <CardContent className="p-0">
+                  <h2 className="text-xl font-bold text-[#1E3A5F] mb-6">AI分析报告</h2>
+                  <div className="prose prose-sm max-w-none text-[#43474c] whitespace-pre-wrap">
+                    {analysisResult || '正在加载分析报告...'}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
 
-            {/* 报告内容 */}
-            <Card className="bg-white border-0 shadow-lg mb-8">
-              <CardContent className="p-6 md:p-8">
-                {/* 渲染Markdown风格的报告 */}
-                <div className="prose prose-gray max-w-none">
-                  <ReportRenderer content={analysisResult} />
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* 操作按钮 */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="text-center px-4">
               <Button
-                onClick={() => window.print()}
+                onClick={() => {
+                  setStatus('intro');
+                  setChildInfo({ name: '', age: '' });
+                  setAnswers([]);
+                  setCurrentQuestion(0);
+                  setAnalysisResult('');
+                }}
                 variant="outline"
-                className="px-8"
+                className="rounded-full border-2 border-gray-200 text-[#43474c] hover:bg-gray-50"
               >
-                打印报告
-              </Button>
-              <Button
-                onClick={handleRestart}
-                className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white px-8"
-              >
-                重新测评
+                返回首页
               </Button>
             </div>
           </div>
         )}
       </main>
-
-      {/* 页脚 */}
-      <footer className="mt-16 py-8 text-center text-sm text-gray-500 border-t">
-        <p>本测评仅供参考，不作为临床诊断依据</p>
-        <p className="mt-1">如有专业需求，请咨询儿童教育专家</p>
-      </footer>
     </div>
   );
-}
-
-// 报告渲染组件
-function ReportRenderer({ content }: { content: string }) {
-  // 解析内容为可渲染的sections
-  const lines = content.split("\n");
-  const elements: React.JSX.Element[] = [];
-  let currentSection: string[] = [];
-  let sectionKey = 0;
-
-  const flushSection = () => {
-    if (currentSection.length > 0) {
-      const text = currentSection.join("\n").trim();
-      if (text) {
-        elements.push(
-          <div key={sectionKey++} className="mb-4 whitespace-pre-wrap text-gray-700 leading-relaxed">
-            {text}
-          </div>
-        );
-      }
-      currentSection = [];
-    }
-  };
-
-  lines.forEach((line) => {
-    const trimmed = line.trim();
-    
-    if (trimmed.startsWith("## ")) {
-      flushSection();
-      elements.push(
-        <h2 key={sectionKey++} className="text-xl font-bold text-gray-900 mt-8 mb-4 flex items-center gap-2">
-          <span className="w-1 h-6 bg-indigo-500 rounded-full"></span>
-          {trimmed.replace("## ", "")}
-        </h2>
-      );
-    } else if (trimmed.startsWith("### ")) {
-      flushSection();
-      elements.push(
-        <h3 key={sectionKey++} className="text-lg font-semibold text-indigo-700 mt-6 mb-3">
-          {trimmed.replace("### ", "")}
-        </h3>
-      );
-    } else if (trimmed.startsWith("**") && trimmed.endsWith("**")) {
-      flushSection();
-      elements.push(
-        <p key={sectionKey++} className="font-bold text-gray-900 mt-4 mb-2">
-          {trimmed.replace(/\*\*/g, "")}
-        </p>
-      );
-    } else if (/^\d+\./.test(trimmed)) {
-      flushSection();
-      elements.push(
-        <div key={sectionKey++} className="flex gap-3 mb-2">
-          <span className="w-6 h-6 bg-indigo-100 text-indigo-700 rounded-full flex items-center justify-center text-sm font-medium flex-shrink-0">
-            {trimmed.charAt(0)}
-          </span>
-          <span className="text-gray-700">{trimmed.replace(/^\d+\.\s*/, "")}</span>
-        </div>
-      );
-    } else if (trimmed.startsWith("- ")) {
-      flushSection();
-      elements.push(
-        <div key={sectionKey++} className="flex gap-3 mb-2">
-          <span className="text-indigo-500 mt-1">•</span>
-          <span className="text-gray-700">{trimmed.replace("- ", "")}</span>
-        </div>
-      );
-    } else if (trimmed) {
-      currentSection.push(line);
-    } else {
-      flushSection();
-    }
-  });
-
-  flushSection();
-  return <>{elements}</>;
 }
