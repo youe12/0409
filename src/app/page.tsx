@@ -9,10 +9,10 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Progress } from '@/components/ui/progress';
 import { 
   Brain, Clock, Star, ChevronRight, ChevronLeft, CheckCircle2, 
-  Sparkles, BookOpen, Users, TrendingUp, MenuBook, Psychology, 
-  ArrowForward, Star as StarIcon, FormatQuote
+  Sparkles, BookOpen, Users, TrendingUp, Menu, Library,
+  ArrowForward, Star as StarIcon, Quote, School, Lightbulb
 } from 'lucide-react';
-import { DimensionChart } from '@/components/dimension-chart';
+import { DimensionBarChart } from '@/components/dimension-chart';
 
 interface Question {
   id: number;
@@ -242,7 +242,7 @@ export default function AssessmentPage() {
                   <div className="absolute bottom-12 -left-16 hidden xl:block z-30 p-6 bg-white/90 backdrop-blur-xl rounded-2xl shadow-xl border border-white/20">
                     <div className="flex items-center gap-4">
                       <div className="w-12 h-12 rounded-full bg-[#ccebc7] flex items-center justify-center">
-                        <Psychology className="w-6 h-6 text-[#4a6549]" />
+                        <Lightbulb className="w-6 h-6 text-[#4a6549]" />
                       </div>
                       <div>
                         <div className="text-2xl font-bold text-[#022846]">98%</div>
@@ -266,7 +266,7 @@ export default function AssessmentPage() {
                   <Card className="p-8 rounded-3xl bg-white shadow-sm hover:shadow-md transition-all border-0">
                     <CardContent className="p-0">
                       <div className="w-14 h-14 rounded-2xl bg-[#022846]/5 flex items-center justify-center mb-6">
-                        <MenuBook className="w-7 h-7 text-[#022846]" />
+                        <Library className="w-7 h-7 text-[#022846]" />
                       </div>
                       <h3 className="text-xl font-bold text-[#022846] mb-4">科学依据</h3>
                       <p className="text-[#43474c] leading-relaxed">基于心理测量学的黄金标准，我们的测评利用经临床验证的认知模型，提供无可比拟的分析深度。</p>
@@ -276,7 +276,7 @@ export default function AssessmentPage() {
                   <Card className="p-8 rounded-3xl bg-white shadow-sm hover:shadow-md transition-all border-2 border-[#4a6549]/10 scale-105 z-10">
                     <CardContent className="p-0">
                       <div className="w-14 h-14 rounded-2xl bg-[#4a6549]/5 flex items-center justify-center mb-6">
-                        <Psychology className="w-7 h-7 text-[#4a6549]" />
+                        <Lightbulb className="w-7 h-7 text-[#4a6549]" />
                       </div>
                       <h3 className="text-xl font-bold text-[#022846] mb-4">AI智能分析</h3>
                       <p className="text-[#43474c] leading-relaxed">我们专有的算法通过分析行为模式和反应延迟，提供360度的全方位认知画像。</p>
@@ -372,7 +372,7 @@ export default function AssessmentPage() {
                       className={`p-8 rounded-3xl relative ${item.featured ? 'bg-[#022846] text-white' : 'bg-white'}`}
                     >
                       <div className="absolute -top-4 -left-4 w-10 h-10 bg-white shadow-md rounded-full flex items-center justify-center">
-                        <FormatQuote className={`w-5 h-5 ${item.featured ? 'text-[#022846]' : 'text-[#022846]'}`} />
+                        <Quote className={`w-5 h-5 ${item.featured ? 'text-[#022846]' : 'text-[#022846]'}`} />
                       </div>
                       <p className="text-lg italic mb-8 leading-relaxed">{item.quote}</p>
                       <div className="flex items-center gap-4">
@@ -589,7 +589,7 @@ export default function AssessmentPage() {
               <Card className="rounded-3xl bg-white shadow-lg border-0 p-6">
                 <CardContent className="p-0">
                   <h2 className="text-xl font-bold text-[#022846] mb-6 text-center">天赋雷达图</h2>
-                  <DimensionChart dimensionScores={getDimensionScores()} />
+                  <DimensionBarChart dimensionScores={getDimensionScores()} />
                 </CardContent>
               </Card>
             </div>
