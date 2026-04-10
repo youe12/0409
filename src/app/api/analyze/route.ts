@@ -91,56 +91,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const encoder = new TextEncoder();
-    
-    // 调试：检查环境变量
-    const apiKey = process.env.COZE_WORKLOAD_IDENTITY_API_KEY;
-    const baseUrl = process.env.COZE_INTEGRATION_BASE_URL || "https://integration.coze.cn";
-    // 使用 integration.coze.cn 作为 modelBaseUrl
-    const modelBaseUrl = process.env.COZE_INTEGRATION_MODEL_BASE_URL || "https://integration.coze.cn/api/v3";
-    
-    console.log("调试信息:");
-    console.log("- API Key 长度:", apiKey?.length || 0);
-    console.log("- baseUrl:", baseUrl);
-    console.log("- modelBaseUrl:", modelBaseUrl);
-    
-    // 检查 config 是否有效
-    let config: Config;
-    try {
-      config = new Config({
-        apiKey: apiKey,
-        baseUrl: baseUrl,
-        modelBaseUrl: modelBaseUrl,
-      });
-      // 验证配置
-      if (!config.apiKey) {
-        throw new Error("API Key 未配置");
-      }
-    } catch (configError) {
-      const errorMsg = configError instanceof Error ? configError.message : String(configError);
-      console.error("Config 初始化错误:", errorMsg);
-      const errorStream = new ReadableStream({
-        start(controller) {
-          controller.enqueue(encoder.encode(`[ERROR]${errorMsg}[/ERROR]`));
-          controller.close();
-        },
-      });
-      return new Response(errorStream, {
-        headers: {
-          "Content-Type": "text/event-stream; charset=utf-8",
-          "Transfer-Encoding": "chunked",
-        },
-      });
-    }
+    const config = new Config();
+    const customHeaders = HeaderUtils.extractForwardHeaders(request.headers);
+    const client = new LLMClient(config, customHeaders);
 
+    const prompt = buildAnalysisPrompt(body);
+
+    // 使用流式输出
+    const encoder = new TextEncoder();
     const stream = new ReadableStream({
       async start(controller) {
         try {
-          const customHeaders = HeaderUtils.extractForwardHeaders(request.headers);
-          const client = new LLMClient(config, customHeaders);
-
-          const prompt = buildAnalysisPrompt(body);
-
           const messages: Array<{ role: "system" | "user" | "assistant"; content: string }> = [
             { role: "system", content: LLM_CONFIG.systemPrompt },
             { role: "user", content: prompt },
@@ -160,9 +121,7 @@ export async function POST(request: NextRequest) {
           controller.close();
         } catch (error) {
           console.error("流式分析错误:", error);
-          const errorMessage = error instanceof Error ? error.message : String(error);
-          controller.enqueue(encoder.encode(`\n\n[ERROR]分析失败: ${errorMessage}[/ERROR]`));
-          controller.close();
+          controller.error(error);
         }
       },
     });
@@ -175,11 +134,10 @@ export async function POST(request: NextRequest) {
         "Connection": "keep-alive",
       },
     });
-  } catch (error: unknown) {
+  } catch (error) {
     console.error("分析请求错误:", error);
-    const errorMessage = error instanceof Error ? error.message : String(error);
     return NextResponse.json(
-      { error: `分析服务暂时不可用: ${errorMessage}` },
+      { error: "分析服务暂时不可用，请稍后重试" },
       { status: 500 }
     );
   }
